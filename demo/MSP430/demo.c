@@ -51,27 +51,26 @@ main( void )
 
     /* Delay for ACLK startup. */
     for( usACLKCnt = 0xFFFF; usACLKCnt != 0; usACLKCnt-- );
-    if( cTISetDCO( TI_DCO_4MHZ ) == TI_DCO_NO_ERROR )
+    _EINT(  );
+
+    Init_Clock_16MHz();
+
+    /* Initialize Protocol Stack. */
+    if( ( eStatus = eMBInit( MB_RTU, 0x0A, 0, 38400, MB_PAR_EVEN ) ) != MB_ENOERR )
     {
-        _EINT(  );
+    }
+    /* Enable the Modbus Protocol Stack. */
+    else if( ( eStatus = eMBEnable(  ) ) != MB_ENOERR )
+    {
+    }
+    else
+    {
+        for( ;; )
+        {
+            ( void )eMBPoll(  );
 
-        /* Initialize Protocol Stack. */
-        if( ( eStatus = eMBInit( MB_RTU, 0x0A, 0, 38400, MB_PAR_EVEN ) ) != MB_ENOERR )
-        {
-        }
-        /* Enable the Modbus Protocol Stack. */
-        else if( ( eStatus = eMBEnable(  ) ) != MB_ENOERR )
-        {
-        }
-        else
-        {
-            for( ;; )
-            {
-                ( void )eMBPoll(  );
-
-                /* Here we simply count the number of poll cycles. */
-                usRegInputBuf[0]++;
-            }
+            /* Here we simply count the number of poll cycles. */
+            usRegInputBuf[0]++;
         }
     }
     for( ;; );

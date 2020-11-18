@@ -1,5 +1,5 @@
 /*
- * FreeModbus Libary: A portable Modbus implementation for Modbus ASCII/RTU.
+ * FreeModbus Libary: MSP430 Port
  * Copyright (C) 2006 Christian Walter <wolti@sil.at>
  *
  * This library is free software; you can redistribute it and/or
@@ -17,17 +17,23 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * File: $Id$
- *
  */
-#ifndef DCO_H
-#define DCO_H
+#include "dco.h"
+/* ----------------------- Start implementation -----------------------------*/
 
-#include <msp430.h>
+void Init_Clock_16MHz()
+{
+    if (CALBC1_16MHZ == 0xFF)    // If calibration constant erased
+    {
+        while(1); // do not load, trap CPU!!
+    }
+    else                        // If 16MHz Calibration is present in Flash SegmentA Calibration Data
+    {
+        // Select lowest DCOx and MODx settings
+        DCOCTL = 0;
+        BCSCTL1 = CALBC1_16MHZ;     // 16MHz Range Selected from Calibration Data in Flash SegmentA
+        DCOCTL = CALDCO_16MHZ;      // Set DCO step + modulation
 
-/* ----------------------- Defines ------------------------------------------*/
-#define MASK_VLOCLK       0x20        // BCSCTL3 Bits 5-4 = 0b10
-
-/* ----------------------- Function prototypes ------------------------------*/
-void Init_Clock_16MHz(void);
-
-#endif
+        BCSCTL3 = MASK_VLOCLK;      // Set the Low Frequency clock to VLOCLK
+    }
+}
