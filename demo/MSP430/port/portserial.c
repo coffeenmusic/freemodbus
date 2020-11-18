@@ -153,22 +153,26 @@ xMBPortSerialGetByte( CHAR * pucByte )
     return TRUE;
 }
 
-#if defined (__GNUC__)
-interrupt (USART0RX_VECTOR) prvvMBSerialRXIRQHandler( void )
+#if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
+#pragma vector=USCIAB0RX_VECTOR
+__interrupt void prvvMBSerialRXIRQHandler(void)
+#elif defined(__GNUC__)
+void __attribute__ ((interrupt(USCIAB0RX_VECTOR))) prvvMBSerialRXIRQHandler (void)
 #else
-void
-prvvMBSerialRXIRQHandler( void ) __interrupt[USART0RX_VECTOR]
+#error Compiler not supported!
 #endif
 {
     DEBUG_TOGGLE_RX( );
     pxMBFrameCBByteReceived(  );
 }
 
-#if defined (__GNUC__)
-interrupt (USART0TX_VECTOR) prvvMBSerialTXIRQHandler( void )
+#if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
+#pragma vector=USCIAB0TX_VECTOR
+__interrupt void prvvMBSerialTXIRQHandler(void)
+#elif defined(__GNUC__)
+void __attribute__ ((interrupt(USCIAB0TX_VECTOR))) prvvMBSerialTXIRQHandler (void)
 #else
-void
-prvvMBSerialTXIRQHandler( void ) __interrupt[USART0TX_VECTOR]
+#error Compiler not supported!
 #endif
 {
     DEBUG_TOGGLE_TX( );

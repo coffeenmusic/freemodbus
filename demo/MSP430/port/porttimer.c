@@ -81,11 +81,13 @@ vMBPortTimersDisable( void )
     TACTL &= ~( MC0 | MC1 );
 }
 
-#if defined (__GNUC__)
-interrupt (TIMERA0_VECTOR) prvvMBTimerIRQHandler( void )
+#if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
+#pragma vector=TIMER0_A0_VECTOR
+__interrupt void prvvMBTimerIRQHandler(void)
+#elif defined(__GNUC__)
+void __attribute__ ((interrupt(TIMER0_A0_VECTOR))) prvvMBTimerIRQHandler(void)
 #else
-void
-prvvMBTimerIRQHandler( void ) __interrupt[TIMERA0_VECTOR]
+#error Compiler not supported!
 #endif
 {
     ( void )pxMBPortCBTimerExpired(  );
