@@ -31,7 +31,7 @@
 #define REG_INPUT_START   1000
 #define REG_INPUT_NREGS   4
 #define REG_HOLDING_START 1000
-#define REG_HOLDING_NREGS 130
+#define REG_HOLDING_NREGS 32
 
 /* ----------------------- Static variables ---------------------------------*/
 static USHORT   usRegInputStart = REG_INPUT_START;
