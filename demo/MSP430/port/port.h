@@ -24,22 +24,22 @@
 
 /* ----------------------- Platform includes --------------------------------*/
 
-#include <msp430x16x.h>
+#include <msp430.h>
 #if defined (__GNUC__)
 #include <signal.h>
 #endif
 #undef CHAR
 
 /* ----------------------- Defines ------------------------------------------*/
-#define	INLINE
+#define INLINE
 #define PR_BEGIN_EXTERN_C           extern "C" {
-#define	PR_END_EXTERN_C             }
+#define PR_END_EXTERN_C             }
 
 #define ENTER_CRITICAL_SECTION( )   EnterCriticalSection( )
 #define EXIT_CRITICAL_SECTION( )    ExitCriticalSection( )
 #define assert( expr )
 
-#define SMCLK                       ( 4000000UL )
+#define SMCLK                       ( 16000000UL )
 #define ACLK                        ( 32768UL )
 
 typedef char    BOOL;
