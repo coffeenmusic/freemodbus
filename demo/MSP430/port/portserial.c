@@ -189,7 +189,8 @@ EnterCriticalSection( void )
         usOldSR = READ_SR;
         _DINT( );
 #else
-        usOldSR = _DINT( );
+        usOldSR = __get_SR_register();
+        _DINT( );
 #endif
         ucGIEWasEnabled = usOldSR & GIE ? TRUE : FALSE;
     }
