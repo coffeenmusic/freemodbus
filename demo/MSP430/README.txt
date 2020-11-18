@@ -6,8 +6,8 @@ REQUIREMENTS
 ============
 
 This demo application provides a port for  the	MSP430	series	of  processors
-from  Text  Instruments.   The	port  was  done  using	the  MSP430-P169  from
-Olimex[1] which features a MSP430F169 MCU.
+from  Text  Instruments.   The	port  was  done  using	the  MSP-EXP430G2  from
+TI[1] which features a MSP430G2553 MCU.
 It requires a wired serial port to  a  host  processor	and  a	Modbus	Master
 Software on the PC side  to  be  useful.   Demo  versions  of  Modbus  Masters
 can be found in [2] and [3].
@@ -43,9 +43,9 @@ at [4].
 PROBLEMS
 ========
 
-[1] Olimex MSP430-P169 kit: http://www.olimex.com/dev/msp-p169.html
+[1] TI MSP-EXP430G2 kit: https://www.ti.com/tool/MSP-EXP430G2
 [2] WinTech ModScan32: http://www.win-tech.com/html/modscan32.htm
 [3] Modus Poll: http://www.modbustools.com/modbus_poll.asp
 [4] FieldTalk Modpoll: http://www.focus-sw.com/fieldtalk/modpoll.html
 
-Version: $Id: README.txt,v 1.1 2006/11/19 03:00:33 wolti Exp $
+Version: $Id: README.txt,v 1.1 2020/11/18 03:00:33 wolti Exp $
