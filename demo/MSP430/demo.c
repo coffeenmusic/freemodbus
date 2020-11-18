@@ -51,12 +51,13 @@ main( void )
 
     /* Delay for ACLK startup. */
     for( usACLKCnt = 0xFFFF; usACLKCnt != 0; usACLKCnt-- );
-    _EINT(  );
 
     Init_Clock_16MHz();
 
+    _EINT(  );
+
     /* Initialize Protocol Stack. */
-    if( ( eStatus = eMBInit( MB_RTU, 0x0A, 0, 38400, MB_PAR_EVEN ) ) != MB_ENOERR )
+    if( ( eStatus = eMBInit( MB_RTU, 0x0A, 0, 115200, MB_PAR_EVEN ) ) != MB_ENOERR )
     {
     }
     /* Enable the Modbus Protocol Stack. */
@@ -75,6 +76,8 @@ main( void )
     }
     for( ;; );
 }
+
+
 
 eMBErrorCode
 eMBRegInputCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs )
