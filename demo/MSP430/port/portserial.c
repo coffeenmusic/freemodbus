@@ -26,6 +26,7 @@
 #include "mb.h"
 #include "mbport.h"
 
+
 /* ----------------------- Defines ------------------------------------------*/
 #define U0_CHAR                 ( 0x10 )        /* Data 0:7-bits / 1:8-bits */
 
@@ -33,7 +34,7 @@
 
 #if DEBUG_PERFORMANCE == 1
 #define DEBUG_PIN_RX            ( 0 )
-#define DEBUG_PIN_TX            ( 1 )
+#define DEBUG_PIN_TX            ( 6 )
 #define DEBUG_PORT_DIR          ( P1DIR )
 #define DEBUG_PORT_OUT          ( P1OUT )
 #define DEBUG_INIT( )           \
@@ -63,20 +64,20 @@ vMBPortSerialEnable( BOOL xRxEnable, BOOL xTxEnable )
     ENTER_CRITICAL_SECTION(  );
     if( xRxEnable )
     {
-        IE1 |= URXIE0;
+        IE2 |= UCA0RXIE;
     }
     else
     {
-        IE1 &= ~URXIE0;
+        IE2 &= ~UCA0RXIE;
     }
     if( xTxEnable )
     {
-        IE1 |= UTXIE0;
-        IFG1 |= UTXIFG0;
+        IE2 |= UCA0TXIE;
+        IFG2 |= UCA0TXIFG;
     }
     else
     {
-        IE1 &= ~UTXIE0;
+        IE2 &= ~UCA0TXIE;
     }
     EXIT_CRITICAL_SECTION(  );
 }
@@ -85,26 +86,26 @@ BOOL
 xMBPortSerialInit( UCHAR ucPort, ULONG ulBaudRate, UCHAR ucDataBits, eMBParity eParity )
 {
     BOOL            bInitialized = TRUE;
-    USHORT          UxCTL = 0;
-    USHORT          UxBR = ( USHORT ) ( SMCLK / ulBaudRate );
+    USHORT          UCAxCTL0 = 0;
+    float           NN = (float)SMCLK/ulBaudRate;
 
     switch ( eParity )
     {
     case MB_PAR_NONE:
         break;
     case MB_PAR_ODD:
-        UxCTL |= PENA;
+        UCAxCTL0 |= UCPEN;
         break;
     case MB_PAR_EVEN:
-        UxCTL |= PENA | PEV;
+        UCAxCTL0 |= UCPEN | UCPAR;
         break;
     }
     switch ( ucDataBits )
     {
     case 8:
-        UxCTL |= U0_CHAR;
         break;
     case 7:
+        UCAxCTL0 |= UC7BIT;
         break;
     default:
         bInitialized = FALSE;
@@ -112,25 +113,41 @@ xMBPortSerialInit( UCHAR ucPort, ULONG ulBaudRate, UCHAR ucDataBits, eMBParity e
     if( bInitialized )
     {
         ENTER_CRITICAL_SECTION(  );
-        /* Reset USART */
-        U0CTL |= SWRST;
+        /* Reset USCI */
+        UCA0CTL1 |= UCSWRST;
         /* Initialize all UART registers */
-        U0CTL = UxCTL | SWRST;
+        UCA0CTL0 = UCAxCTL0;
         /* SSELx = 11 = SMCLK. Use only if PLL is synchronized ! */
-        U0TCTL = SSEL1 | SSEL0;
-        U0RCTL = URXEIE;
-        /* Configure USART0 Baudrate Registers. */
-        U0BR0 = ( UxBR & 0xFF );
-        U0BR1 = ( UxBR >> 8 );
-        U0MCTL = 0;
-        /* Enable UART */
-        ME1 |= UTXE0 | URXE0;
-        /* Clear reset flag. */
-        U0CTL &= ~SWRST;
+        UCA0CTL1 |= UCSSEL1;
+        UCA0CTL1 |= UCRXEIE;
 
-        /* USART0 TXD/RXD */
-        P3SEL |= 0x30;
-        P3DIR |= 0x10;
+        /* Configure USCI Baudrate Registers. */
+        if(NN > 16){
+            UCA0MCTL |= UCOS16; // Enable Oversampling. Needed when N >= 16. N=BRCLK/Baud
+            float Nd16 = NN/16;
+            UCA0BR0 = ( (int)Nd16 & 0xFF );
+            UCA0BR1 = ( (int)Nd16 >> 8 )*256;
+            USHORT UCBRFx = (USHORT) ((float)(Nd16 - (int)Nd16)*16);
+            UCA0MCTL |= UCBRFx << 4 & 0b11110000;
+        }
+        else
+        {
+            UCA0BR0 = ( (int)NN & 0xFF );
+            UCA0BR1 = ( (int)NN >> 8 )*256;
+            USHORT UCBRSx = (USHORT) ((float)(NN - (int)NN)*8);
+            UCA0MCTL |= UCBRSx << 1 & 0b00001110;
+        }
+//        UCA0MCTL |= UCOS16;                     // Enable Oversampling. Needed when N >= 16. N=BRCLK/Baud
+//        UCA0BR0 = 26;                            // Prescaler
+//        UCA0BR1 = 0;
+//        UCA0MCTL |= UCBRF0;    // First Stage Modulator bits [7-4] = 01
+
+        /* Clear reset flag. */
+        UCA0CTL1 &= ~UCSWRST;
+
+        /* USCI UART TXD/RXD */
+        P1SEL |= BIT2 + BIT1;   // Assign UART pins to USCI_A0
+        P1SEL2|= BIT2 + BIT1;   // Assign UART pins to USCI_A0
 
         EXIT_CRITICAL_SECTION(  );
 
@@ -142,14 +159,14 @@ xMBPortSerialInit( UCHAR ucPort, ULONG ulBaudRate, UCHAR ucDataBits, eMBParity e
 BOOL
 xMBPortSerialPutByte( CHAR ucByte )
 {
-    TXBUF0 = ucByte;
+    UCA0TXBUF = ucByte;
     return TRUE;
 }
 
 BOOL
 xMBPortSerialGetByte( CHAR * pucByte )
 {
-    *pucByte = RXBUF0;
+    *pucByte = UCA0RXBUF;
     return TRUE;
 }
 
