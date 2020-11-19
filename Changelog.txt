@@ -1,3 +1,7 @@
+2020-11-19 (REL_1_7_0) Stephen Thompson
+ Notes: Updated MSP430 demo to run on MSP430G2553 with TI compiler
+  using code composer studio. Tested on MSP-EXP430G2 eval board.
+
 2018-09-13 (REL_1_6_0) Christian Walter <cwalter@embedded-solutions.at>
  Notes: Changed licensing for mbfuncdisc.c. Updating licensing info
   and contact details in core stack.
